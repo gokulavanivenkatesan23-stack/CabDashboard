@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Cab Fleet Dashboard</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-gray-100 p-10">
+
+<h1 class="text-3xl font-bold mb-8">
+🚕 Cab Fleet Dashboard
+</h1>
+
+<!-- ENTRY FORM -->
+
+<div class="bg-white p-6 rounded shadow mb-10">
+
+<h2 class="text-xl font-semibold mb-4">
+Add Driver Entry
+</h2>
+
+<div class="grid grid-cols-5 gap-4">
+
+<input id="date" type="date" class="border p-2">
+
+<input id="driverName" placeholder="Driver Name" class="border p-2">
+
+<input id="carNumber" placeholder="Car Number" class="border p-2">
+
+<input id="driverTrips" placeholder="Trips" type="number" class="border p-2">
+
+<input id="driverEarning" placeholder="Earnings ₹" type="number" class="border p-2">
+
+</div>
+
+<button onclick="saveData()" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded">
+
+Add Entry
+
+</button>
+
+</div>
+
+<!-- SUMMARY -->
+
+<div class="grid grid-cols-3 gap-6 mb-10">
+
+<div class="bg-white p-6 rounded shadow">
+<p class="text-gray-500">Today Revenue</p>
+<p id="today" class="text-2xl font-bold">₹0</p>
+</div>
+
+<div class="bg-white p-6 rounded shadow">
+<p class="text-gray-500">Week Revenue</p>
+<p id="week" class="text-2xl font-bold">₹0</p>
+</div>
+
+<div class="bg-white p-6 rounded shadow">
+<p class="text-gray-500">Month Revenue</p>
+<p id="month" class="text-2xl font-bold">₹0</p>
+</div>
+
+</div>
+
+<!-- DRIVER TABLE -->
+
+<div class="bg-white p-6 rounded shadow">
+
+<h2 class="text-xl font-semibold mb-4">
+
+Driver Details
+
+</h2>
+
+<input 
+id="searchDriver"
+placeholder="Search driver or car..."
+class="border p-2 mb-4 w-64"
+onkeyup="searchDriver()">
+
+<table class="w-full text-left">
+
+<thead>
+
+<tr class="border-b">
+
+<th class="p-2">Driver</th>
+<th class="p-2">Car</th>
+<th class="p-2">Trips</th>
+<th class="p-2">Earnings</th>
+<th class="p-2">Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tableData">
+
+</tbody>
+
+</table>
+
+</div>
+
+<script>
+
+function loadData(){
+
+fetch("/data")
+
+.then(res=>res.json())
+
+.then(data=>{
+
+let html=""
+
+data.forEach(d=>{
+
+html+=`
+
+<tr class="border-b">
+
+<td class="p-2">${d.driverName}</td>
+
+<td class="p-2">${d.carNumber}</td>
+
+<td class="p-2">${d.driverTrips}</td>
+
+<td class="p-2">₹${d.driverEarning}</td>
+
+<td>
+
+<button onclick="deleteData('${d._id}')"
+class="text-red-500">
+
+Delete
+
+</button>
+
+</td>
+
+</tr>
+
+`
+
+})
+
+document.getElementById("tableData").innerHTML=html
+
+})
+
+}
+
+function loadTotals(){
+
+fetch("/totals")
+
+.then(res=>res.json())
+
+.then(t=>{
+
+today.innerText="₹"+t.today
+week.innerText="₹"+t.week
+month.innerText="₹"+t.month
+
+})
+
+}
+
+function saveData(){
+
+fetch("/add",{
+
+method:"POST",
+
+headers:{"Content-Type":"application/json"},
+
+body:JSON.stringify({
+
+date:date.value,
+driverName:driverName.value,
+carNumber:carNumber.value,
+driverTrips:driverTrips.value,
+driverEarning:driverEarning.value
+
+})
+
+}).then(()=>{
+
+loadData()
+loadTotals()
+
+})
+
+}
+
+function deleteData(id){
+
+fetch("/delete/"+id,{method:"DELETE"})
+.then(()=>{
+
+loadData()
+loadTotals()
+
+})
+
+}
+
+loadData()
+loadTotals()
+
+</script>
+
+</body>
+
+</html>
+
+
+

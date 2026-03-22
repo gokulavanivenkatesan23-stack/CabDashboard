@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Driver Management</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-6">
+
+<div class="max-w-6xl mx-auto">
+
+<!-- Header -->
+<div class="flex justify-between items-center mb-6">
+
+<h1 class="text-2xl font-semibold">Driver Management</h1>
+
+<button onclick="goBack()" 
+class="bg-gray-800 text-white px-4 py-2 rounded">
+Back to Dashboard
+</button>
+
+</div>
+
+<!-- Add Driver -->
+<div class="bg-white p-6 rounded shadow mb-8">
+
+<h2 class="text-lg font-medium mb-4">Add Driver</h2>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+
+<input id="name" placeholder="Driver Name" class="border p-2 rounded">
+
+<input id="phone" placeholder="Phone Number" class="border p-2 rounded">
+
+<input id="license" placeholder="License Number" class="border p-2 rounded">
+
+<input id="aadhar" placeholder="Aadhar Number" class="border p-2 rounded">
+
+<input id="dateJoined" type="date" class="border p-2 rounded">
+
+</div>
+
+<button onclick="addDriver()" 
+class="mt-4 bg-blue-600 text-white px-5 py-2 rounded">
+Add Driver
+</button>
+
+</div>
+
+<!-- Driver Table -->
+<div class="bg-white p-6 rounded shadow">
+
+<h2 class="text-lg font-medium mb-4">All Drivers</h2>
+
+<div class="overflow-x-auto">
+
+<table class="w-full text-left border">
+
+<thead class="bg-gray-50">
+
+<tr>
+<th class="p-3 border">Name</th>
+<th class="p-3 border">Phone</th>
+<th class="p-3 border">License</th>
+<th class="p-3 border">Aadhar</th>
+<th class="p-3 border">Date Joined</th>
+<th class="p-3 border">Action</th>
+</tr>
+
+</thead>
+
+<tbody id="driverTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+// ================= LOAD DRIVERS =================
+function loadDrivers(){
+
+fetch("/drivers")
+.then(res=>{
+if(res.status===401){
+window.location="/login.html"
+return
+}
+return res.json()
+})
+.then(data=>{
+
+let html=""
+
+data.forEach(d=>{
+
+html+=`
+<tr>
+
+<td class="p-2 border">${d.name}</td>
+<td class="p-2 border">${d.phone}</td>
+<td class="p-2 border">${d.license || "-"}</td>
+<td class="p-2 border">${d.aadhar || "-"}</td>
+<td class="p-2 border">${d.dateJoined || "-"}</td>
+
+<td class="p-2 border">
+<button onclick="deleteDriver('${d._id}')" 
+class="text-red-600">
+Delete
+</button>
+</td>
+
+</tr>
+`
+
+})
+
+document.getElementById("driverTable").innerHTML = html
+
+})
+
+}
+
+// ================= ADD DRIVER =================
+function addDriver(){
+
+let nameVal = document.getElementById("name").value.trim()
+let phoneVal = document.getElementById("phone").value.trim()
+let licenseVal = document.getElementById("license").value.trim()
+let aadharVal = document.getElementById("aadhar").value.trim()
+let dateJoinedVal = document.getElementById("dateJoined").value
+
+// ✅ Validation
+if(!nameVal || !phoneVal){
+alert("Please fill required fields")
+return
+}
+
+fetch("/addDriver",{
+
+method:"POST",
+headers:{"Content-Type":"application/json"},
+
+body:JSON.stringify({
+name:nameVal,
+phone:phoneVal,
+license:licenseVal,
+aadhar:aadharVal,
+dateJoined:dateJoinedVal
+})
+
+})
+.then(res=>res.text())
+.then(msg=>{
+alert(msg)
+
+// Clear inputs
+document.querySelectorAll("input").forEach(i=>i.value="")
+
+loadDrivers()
+})
+
+}
+
+// ================= DELETE DRIVER =================
+function deleteDriver(id){
+
+if(!confirm("Are you sure you want to delete this driver?")){
+return
+}
+
+fetch("/deleteDriver/"+id,{method:"DELETE"})
+.then(()=>{
+loadDrivers()
+})
+
+}
+
+// ================= NAVIGATION =================
+function goBack(){
+window.location.href="index.html"
+}
+
+// ================= INIT =================
+window.onload = loadDrivers
+
+</script>
+
+</body>
+</html>
