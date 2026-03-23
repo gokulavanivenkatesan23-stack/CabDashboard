@@ -6,264 +6,226 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gray-100 select-none">
 
-<div class="flex flex-col md:flex-row min-h-screen">
+<!-- Loader -->
+<div id="loader" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+🚖 Loading...
+</div>
 
-<!-- Sidebar -->
-<div class="bg-gray-900 text-gray-200 w-full md:w-64 p-4">
+<div class="flex min-h-screen">
 
+<!-- Sidebar (Desktop only) -->
+<div class="hidden md:block bg-gray-900 text-gray-200 w-64 p-4">
 <h2 class="text-xl font-semibold mb-4">Fleet Dashboard</h2>
 
-<ul class="flex md:flex-col gap-4 text-sm">
-
-<li onclick="scrollToSection('entry')" class="cursor-pointer hover:text-white">Dashboard</li>
-
-<li onclick="window.location.href='drivers.html'" class="cursor-pointer hover:text-white">
-Driver Details
-</li>
-
+<ul class="space-y-3">
+<li onclick="location.reload()" class="cursor-pointer hover:text-white">Dashboard</li>
+<li onclick="window.location='drivers.html'" class="cursor-pointer hover:text-white">Drivers</li>
 </ul>
-
 </div>
 
 <!-- Main -->
-<div class="flex-1 p-4 md:p-10">
+<div class="flex-1 p-4 md:p-10 pb-24">
 
 <!-- Header -->
 <div class="flex justify-between items-center mb-6">
 
-<h1 class="text-xl md:text-2xl font-semibold">Cab Business Operations</h1>
+<h1 class="text-xl md:text-2xl font-semibold">Cab Business</h1>
 
-<div>
-<span class="mr-4 text-gray-600">
-Logged in as: <b id="usernameDisplay"></b>
-</span>
-
-<button onclick="logout()" 
-class="bg-red-600 text-white px-4 py-2 rounded">
-Logout
+<div class="relative">
+<button onclick="toggleProfile()" class="bg-gray-800 text-white px-4 py-2 rounded">
+👤 <span id="username">User</span>
 </button>
+
+<div id="profileMenu" class="hidden absolute right-0 mt-2 bg-white shadow rounded w-40">
+<button onclick="logout()" class="block w-full text-left px-4 py-2 hover:bg-gray-100">Logout</button>
+</div>
 </div>
 
 </div>
 
 <!-- Entry Form -->
-<div id="entry" class="bg-white p-6 rounded shadow mb-8">
+<div class="bg-white p-5 rounded-xl shadow mb-6">
 
-<h2 class="text-lg font-medium mb-4">Add Entry</h2>
+<h2 class="text-lg font-medium mb-4">Driver Entry</h2>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-3">
 
-<input id="date" type="date" class="border p-2 rounded">
+<div class="bg-gray-50 p-2 rounded-xl">
+<label class="text-xs text-gray-500">Date</label>
+<input id="date" type="date" class="border p-3 rounded-xl w-full text-lg">
+</div>
 
-<select id="driverName" class="border p-2 rounded">
+<div class="bg-gray-50 p-2 rounded-xl">
+<label class="text-xs text-gray-500">Driver</label>
+<select id="driverName" class="border p-3 rounded-xl w-full text-lg">
 <option value="">Select Driver</option>
 </select>
-
-<input id="carNumber" placeholder="Car Number" class="border p-2 rounded">
-
-<input id="driverTrips" type="number" placeholder="Trips" class="border p-2 rounded">
-
-<input id="driverEarning" type="number" placeholder="Earnings" class="border p-2 rounded">
-
 </div>
 
-<div class="mt-4 flex gap-3">
+<div class="bg-gray-50 p-2 rounded-xl">
+<label class="text-xs text-gray-500">Car</label>
+<input id="carNumber" class="border p-3 rounded-xl w-full text-lg">
+</div>
 
-<button onclick="saveData()" id="saveBtn"
-class="bg-blue-600 text-white px-4 py-2 rounded">
-Add Entry
-</button>
+<div class="bg-gray-50 p-2 rounded-xl">
+<label class="text-xs text-gray-500">Trips</label>
+<input id="driverTrips" type="number" class="border p-3 rounded-xl w-full text-lg">
+</div>
 
-<button onclick="cancelEdit()" id="cancelBtn"
-class="bg-gray-500 text-white px-4 py-2 rounded hidden">
-Cancel
-</button>
+<div class="bg-gray-50 p-2 rounded-xl">
+<label class="text-xs text-gray-500">Earnings</label>
+<input id="driverEarning" type="number" class="border p-3 rounded-xl w-full text-lg">
+</div>
 
 </div>
 
 </div>
 
-<!-- Summary -->
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+<!-- Cards -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
 
-<div class="bg-white p-5 rounded shadow">
-<p class="text-gray-500 text-sm">Today Revenue</p>
-<p id="today" class="text-xl font-semibold">0</p>
+<div class="bg-white p-4 rounded-xl shadow">
+<p class="text-xs text-gray-500">Today</p>
+<p id="today" class="text-lg font-bold">0</p>
 </div>
 
-<div class="bg-white p-5 rounded shadow">
-<p class="text-gray-500 text-sm">Week Revenue</p>
-<p id="week" class="text-xl font-semibold">0</p>
+<div class="bg-white p-4 rounded-xl shadow">
+<p class="text-xs text-gray-500">Week</p>
+<p id="week" class="text-lg font-bold">0</p>
 </div>
 
-<div class="bg-white p-5 rounded shadow">
-<p class="text-gray-500 text-sm">Month Revenue</p>
-<p id="month" class="text-xl font-semibold">0</p>
+<div class="bg-white p-4 rounded-xl shadow">
+<p class="text-xs text-gray-500">Month</p>
+<p id="month" class="text-lg font-bold">0</p>
 </div>
 
-<div class="bg-white p-5 rounded shadow">
-<p class="text-gray-500 text-sm">Total Trips</p>
-<p id="totalTrips" class="text-xl font-semibold">0</p>
+<div class="bg-white p-4 rounded-xl shadow">
+<p class="text-xs text-gray-500">Trips</p>
+<p id="totalTrips" class="text-lg font-bold">0</p>
 </div>
-
-</div>
-
-<!-- Comparison -->
-<div class="bg-white p-6 rounded shadow mb-8">
-
-<h2 class="text-lg font-medium mb-4">Comparison</h2>
-
-<p>Today: <b id="cToday"></b></p>
-<p>Yesterday: <b id="cYesterday"></b></p>
-<p>Week: <b id="cWeek"></b></p>
 
 </div>
 
 <!-- Chart -->
-<div class="bg-white p-6 rounded shadow mb-8">
-
-<h2 class="text-lg font-medium mb-4">Driver Revenue (Total)</h2>
-
+<div class="bg-white p-5 rounded-xl shadow mb-6">
+<h2 class="mb-3">Driver Earnings</h2>
 <canvas id="chart"></canvas>
-
 </div>
 
-<!-- Table -->
-<div class="bg-white p-6 rounded shadow">
+<!-- Data -->
+<div id="dataContainer"></div>
 
-<div class="flex justify-between mb-4">
+</div>
+</div>
 
-<input id="searchInput"
-placeholder="Search"
-class="border p-2 rounded w-64"
-onkeyup="searchDriver()">
-
-<button onclick="downloadExcel()"
-class="bg-blue-600 text-white px-4 py-2 rounded">
-Export Excel
+<!-- Floating Add Button -->
+<button onclick="saveData()" 
+class="fixed bottom-20 right-5 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg md:hidden">
++
 </button>
 
-</div>
+<!-- Bottom Nav (Mobile) -->
+<div class="fixed bottom-0 left-0 right-0 bg-white shadow md:hidden flex justify-around p-3">
 
-<div class="overflow-x-auto">
+<button onclick="location.reload()" class="text-blue-600">
+🏠 <br><span class="text-xs">Home</span>
+</button>
 
-<table class="w-full border">
+<button onclick="window.location='drivers.html'">
+👤 <br><span class="text-xs">Drivers</span>
+</button>
 
-<thead class="bg-gray-50">
-
-<tr>
-<th class="p-3 border">Driver</th>
-<th class="p-3 border">Car</th>
-<th class="p-3 border">Trips</th>
-<th class="p-3 border">Earnings</th>
-<th class="p-3 border">Action</th>
-</tr>
-
-</thead>
-
-<tbody id="tableData"></tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</div>
 </div>
 
 <script>
 
 let chart
-let editId=null
-let isEditMode=false
+let editId = null
 
-// Username
-document.getElementById("usernameDisplay").innerText =
-localStorage.getItem("username") || "User"
-
-// ================= DRIVER DROPDOWN =================
-function loadDriverDropdown(){
-
+// ===== Load Drivers =====
+function loadDrivers(){
 fetch("/drivers")
 .then(res=>res.json())
 .then(data=>{
-
 let options = `<option value="">Select Driver</option>`
-
 data.forEach(d=>{
 options += `<option value="${d.name}">${d.name}</option>`
 })
-
 driverName.innerHTML = options
-
 })
-
 }
 
-// ================= LOAD DATA =================
+// ===== Load Data =====
 function loadData(){
-
 fetch("/data")
 .then(res=>res.json())
 .then(data=>{
 
 let html=""
 let trips=0
-
 let driverMap = {}
 
-// Table + grouping
 data.forEach(d=>{
 
 trips += Number(d.driverTrips)
 
-// GROUPING
-if(!driverMap[d.driverName]){
-driverMap[d.driverName]=0
-}
+// group earnings
+if(!driverMap[d.driverName]) driverMap[d.driverName]=0
 driverMap[d.driverName]+=Number(d.driverEarning)
 
-// Table
-html+=`
-<tr>
+// MOBILE CARD VIEW
+if(window.innerWidth < 768){
 
-<td class="p-2 border">${d.driverName}</td>
-<td class="p-2 border">${d.carNumber}</td>
-<td class="p-2 border">${d.driverTrips}</td>
-<td class="p-2 border">${d.driverEarning}</td>
+html += `
+<div class="bg-white p-4 mb-3 rounded-xl shadow">
 
-<td class="p-2 border">
+<p class="font-bold">${d.driverName}</p>
+<p class="text-sm text-gray-500">${d.carNumber}</p>
 
-<button onclick="editData('${d._id}','${d.date}','${d.driverName}','${d.carNumber}','${d.driverTrips}','${d.driverEarning}')">
-Edit
-</button>
+<p class="mt-2">Trips: ${d.driverTrips}</p>
+<p>₹ ${d.driverEarning}</p>
 
-<button onclick="deleteData('${d._id}')" class="text-red-600 ml-2">
-Delete
-</button>
+<p class="text-xs text-gray-400 mt-1">
+${new Date(d.date).toLocaleDateString()}
+</p>
 
-</td>
+<div class="mt-2">
+<button onclick="editData('${d._id}')" class="text-blue-600">Edit</button>
+<button onclick="deleteData('${d._id}')" class="text-red-600 ml-3">Delete</button>
+</div>
 
-</tr>
+</div>
 `
+
+} else {
+
+// DESKTOP TABLE
+html += `
+<table class="w-full border mb-2 bg-white">
+<tr>
+<td class="p-2">${new Date(d.date).toLocaleDateString()}</td>
+<td class="p-2">${d.driverName}</td>
+<td class="p-2">${d.carNumber}</td>
+<td class="p-2">${d.driverTrips}</td>
+<td class="p-2">${d.driverEarning}</td>
+<td class="p-2">
+<button onclick="editData('${d._id}')" class="text-blue-600">Edit</button>
+<button onclick="deleteData('${d._id}')" class="text-red-600 ml-2">Delete</button>
+</td>
+</tr>
+</table>
+`
+}
+
 })
 
-// Update table
-tableData.innerHTML=html
-totalTrips.innerText=trips
-
-// SORT DRIVERS BY EARNING
-let sorted = Object.entries(driverMap).sort((a,b)=>b[1]-a[1])
-
-let labels = sorted.map(x=>x[0])
-let revenue = sorted.map(x=>x[1])
+dataContainer.innerHTML = html
+totalTrips.innerText = trips
 
 // Chart
 if(chart) chart.destroy()
@@ -271,21 +233,19 @@ if(chart) chart.destroy()
 chart = new Chart(document.getElementById("chart"),{
 type:"bar",
 data:{
-labels:labels,
+labels:Object.keys(driverMap),
 datasets:[{
-label:"Total Earnings per Driver",
-data:revenue
+label:"Earnings",
+data:Object.values(driverMap)
 }]
 }
 })
 
 })
-
 }
 
-// ================= TOTALS =================
+// ===== Totals =====
 function loadTotals(){
-
 fetch("/totals")
 .then(res=>res.json())
 .then(t=>{
@@ -293,40 +253,13 @@ today.innerText=t.today
 week.innerText=t.week
 month.innerText=t.month
 })
-
 }
 
-// ================= COMPARISON =================
-function loadComparison(){
-
-fetch("/comparison")
-.then(res=>res.json())
-.then(c=>{
-cToday.innerText=c.today
-cYesterday.innerText=c.yesterday
-cWeek.innerText=c.week
-})
-
-}
-
-// ================= SAVE =================
+// ===== Save =====
 function saveData(){
 
-if(!driverName.value){
-alert("Select Driver")
-return
-}
-
-let url="/add"
-let method="POST"
-
-if(isEditMode){
-url="/update/"+editId
-method="PUT"
-}
-
-fetch(url,{
-method:method,
+fetch(editId ? "/update/"+editId : "/add",{
+method: editId ? "PUT" : "POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
 date:date.value,
@@ -339,100 +272,75 @@ driverEarning:driverEarning.value
 .then(res=>res.text())
 .then(msg=>{
 alert(msg)
+editId=null
+clearForm()
 loadData()
 loadTotals()
-loadComparison()
-cancelEdit()
 })
-
 }
 
-// ================= EDIT =================
-function editData(id,d,n,c,t,e){
+// ===== Edit =====
+function editData(id){
+fetch("/data")
+.then(res=>res.json())
+.then(data=>{
+const d = data.find(x=>x._id===id)
 
-editId=id
-isEditMode=true
+date.value = d.date
+driverName.value = d.driverName
+carNumber.value = d.carNumber
+driverTrips.value = d.driverTrips
+driverEarning.value = d.driverEarning
 
-date.value=d
-driverName.value=n
-carNumber.value=c
-driverTrips.value=t
-driverEarning.value=e
-
-saveBtn.innerText="Update"
-cancelBtn.classList.remove("hidden")
-
+editId = id
+})
 }
 
-// ================= CANCEL =================
-function cancelEdit(){
-
-editId=null
-isEditMode=false
-
-document.querySelectorAll("input").forEach(i=>i.value="")
-driverName.value=""
-
-saveBtn.innerText="Add Entry"
-cancelBtn.classList.add("hidden")
-
-}
-
-// ================= DELETE =================
+// ===== Delete =====
 function deleteData(id){
-
 fetch("/delete/"+id,{method:"DELETE"})
 .then(()=>{
 loadData()
 loadTotals()
 })
-
 }
 
-// ================= SEARCH =================
-function searchDriver(){
-
-let val=document.getElementById("searchInput").value.toLowerCase()
-
-document.querySelectorAll("#tableData tr").forEach(r=>{
-r.style.display=r.innerText.toLowerCase().includes(val)?"":"none"
-})
-
+// ===== Clear =====
+function clearForm(){
+driverName.value=""
+carNumber.value=""
+driverTrips.value=""
+driverEarning.value=""
+setToday()
 }
 
-// ================= EXCEL =================
-function downloadExcel(){
-
-fetch("/data")
-.then(res=>res.json())
-.then(data=>{
-const ws = XLSX.utils.json_to_sheet(data)
-const wb = XLSX.utils.book_new()
-XLSX.utils.book_append_sheet(wb, ws, "Data")
-XLSX.writeFile(wb,"cab_dashboard.xlsx")
-})
-
+// ===== Date =====
+function setToday(){
+date.value = new Date().toISOString().split("T")[0]
 }
 
-// ================= LOGOUT =================
+// ===== Profile =====
+function toggleProfile(){
+profileMenu.classList.toggle("hidden")
+}
+
+// ===== Logout =====
 function logout(){
-
-fetch("/logout")
-.then(()=>{
-localStorage.clear()
-window.location="/login.html"
-})
-
+fetch("/logout").then(()=>window.location="login.html")
 }
 
-// ================= INIT =================
-window.onload=function(){
+// ===== Username =====
+const user = JSON.parse(localStorage.getItem("user"))
+if(user) username.innerText = user.username
 
-loadDriverDropdown()
+// ===== INIT =====
+setToday()
+loadDrivers()
 loadData()
 loadTotals()
-loadComparison()
 
+window.onload = ()=>{
+document.getElementById("loader").style.display="none"
 }
 
 </script>
