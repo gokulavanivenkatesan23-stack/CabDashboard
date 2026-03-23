@@ -126,10 +126,10 @@
 <!-- Floating Add Button -->
 <button onclick="saveData()" 
 class="fixed bottom-20 right-5 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg md:hidden">
-+
+Add Entry
 </button>
 
-<!-- Bottom Nav (Mobile) -->
+<!-- Bottom Nav -->
 <div class="fixed bottom-0 left-0 right-0 bg-white shadow md:hidden flex justify-around p-3">
 
 <button onclick="location.reload()" class="text-blue-600">
@@ -166,22 +166,21 @@ fetch("/data")
 .then(res=>res.json())
 .then(data=>{
 
-let html=""
+let mobileHTML = ""
+let tableRows = ""
 let trips=0
 let driverMap = {}
 
+// build data
 data.forEach(d=>{
 
 trips += Number(d.driverTrips)
 
-// group earnings
 if(!driverMap[d.driverName]) driverMap[d.driverName]=0
 driverMap[d.driverName]+=Number(d.driverEarning)
 
-// MOBILE CARD VIEW
-if(window.innerWidth < 768){
-
-html += `
+// mobile card
+mobileHTML += `
 <div class="bg-white p-4 mb-3 rounded-xl shadow">
 
 <p class="font-bold">${d.driverName}</p>
@@ -202,12 +201,9 @@ ${new Date(d.date).toLocaleDateString()}
 </div>
 `
 
-} else {
-
-// DESKTOP TABLE
-html += `
-<table class="w-full border mb-2 bg-white">
-<tr>
+// desktop rows
+tableRows += `
+<tr class="border-t">
 <td class="p-2">${new Date(d.date).toLocaleDateString()}</td>
 <td class="p-2">${d.driverName}</td>
 <td class="p-2">${d.carNumber}</td>
@@ -218,16 +214,40 @@ html += `
 <button onclick="deleteData('${d._id}')" class="text-red-600 ml-2">Delete</button>
 </td>
 </tr>
+`
+})
+
+// choose view
+if(window.innerWidth < 768){
+
+dataContainer.innerHTML = mobileHTML
+
+}else{
+
+dataContainer.innerHTML = `
+<div class="overflow-x-auto">
+<table class="w-full border bg-white rounded-xl overflow-hidden">
+<thead class="bg-gray-100">
+<tr>
+<th class="p-2">Date</th>
+<th class="p-2">Driver</th>
+<th class="p-2">Car</th>
+<th class="p-2">Trips</th>
+<th class="p-2">Earnings</th>
+<th class="p-2">Action</th>
+</tr>
+</thead>
+<tbody>
+${tableRows}
+</tbody>
 </table>
+</div>
 `
 }
 
-})
-
-dataContainer.innerHTML = html
 totalTrips.innerText = trips
 
-// Chart
+// chart
 if(chart) chart.destroy()
 
 chart = new Chart(document.getElementById("chart"),{
