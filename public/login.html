@@ -2,46 +2,26 @@
 <html>
 
 <head>
-<title>Login - Cab Dashboard</title>
-
+<title>Login</title>
 <script src="https://cdn.tailwindcss.com"></script>
-
 </head>
 
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="bg-gray-100 flex items-center justify-center h-screen">
 
-<div class="bg-white p-8 rounded shadow w-full max-w-md">
+<div class="bg-white p-6 rounded shadow w-80">
 
-<h2 class="text-2xl font-semibold mb-6 text-center">
-Login
-</h2>
+<h2 class="text-xl mb-4 text-center">Login</h2>
 
-<!-- Username -->
-<input 
-id="username" 
-placeholder="Username"
-class="border p-3 rounded w-full mb-4"
-/>
+<input id="username" placeholder="Username" class="border p-2 w-full mb-3 rounded">
 
-<!-- Password -->
-<input 
-id="password" 
-type="password"
-placeholder="Password"
-class="border p-3 rounded w-full mb-4"
-/>
+<input id="password" type="password" placeholder="Password" class="border p-2 w-full mb-3 rounded">
 
-<!-- Login Button -->
-<button 
-onclick="login()" 
-class="bg-blue-600 text-white w-full py-3 rounded">
+<button onclick="login()" class="bg-blue-600 text-white w-full py-2 rounded">
 Login
 </button>
 
-<!-- Register -->
-<p class="text-sm text-center mt-4">
-Don't have an account?
-<a href="/register.html" class="text-blue-600">Register</a>
+<p class="text-sm mt-3 text-center">
+No account? <a href="register.html" class="text-blue-600">Register</a>
 </p>
 
 </div>
@@ -50,47 +30,32 @@ Don't have an account?
 
 function login(){
 
-let user = document.getElementById("username").value.trim()
-let pass = document.getElementById("password").value.trim()
-
-// Basic validation
-if(!user || !pass){
-alert("Please enter username and password")
-return
-}
-
 fetch("/login",{
-
 method:"POST",
-headers:{"Content-Type":"application/json"},
-
+headers:{
+"Content-Type":"application/json"
+},
 body:JSON.stringify({
-username:user,
-password:pass
+username:username.value,
+password:password.value
 })
-
 })
 .then(res=>res.json())
-.then(d=>{
+.then(data=>{
 
-if(d.status==="success"){
+if(data.status==="success"){
 
-// ✅ store username properly
-localStorage.setItem("username", d.username)
-
-// redirect to dashboard
-window.location.href = "/index.html"
+localStorage.setItem("user",JSON.stringify(data))
+window.location="index.html"
 
 }else{
-
-alert("Invalid username or password")
-
+alert("Invalid login")
 }
 
 })
 .catch(err=>{
-console.log(err)
 alert("Server error")
+console.log(err)
 })
 
 }

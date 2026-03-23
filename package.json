@@ -13,8 +13,19 @@
   "type": "commonjs",
   "dependencies": {
     "body-parser": "^2.2.2",
+    "connect-mongo": "^6.0.0",
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "mongoose": "^9.3.1"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gokulavanivenkatesan23-stack/CabDashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gokulavanivenkatesan23-stack/CabDashboard/issues"
+  },
+  "homepage": "https://github.com/gokulavanivenkatesan23-stack/CabDashboard#readme"
 }
